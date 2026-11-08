@@ -77,7 +77,7 @@ async function hasWebGPU() {
 
 // ---- Detector (ONNX Runtime Web, WASM) ----
 /** Downloads one URL and verifies size + SHA-256. Throws on any mismatch. */
-async function downloadDetector(url: string): Promise<Uint8Array> {
+async function downloadDetector(url: string): Promise<Uint8Array<ArrayBuffer>> {
   const files = fileProgress.detector;
   const res = await fetch(url);
   if (!res.ok || !res.body) throw new Error(`Failed to fetch detector model (HTTP ${res.status}).`);
@@ -105,7 +105,7 @@ async function downloadDetector(url: string): Promise<Uint8Array> {
   return bytes;
 }
 
-async function fetchDetector(): Promise<Uint8Array> {
+async function fetchDetector(): Promise<Uint8Array<ArrayBuffer>> {
   // The cache key is the primary URL; the fallback mirror serves the same (hash-checked) bytes.
   const cacheKey = LOCAL_MODELS.detectorUrls[0];
   try {
@@ -113,7 +113,7 @@ async function fetchDetector(): Promise<Uint8Array> {
     const hit = await cache.match(cacheKey);
     if (hit) return new Uint8Array(await hit.arrayBuffer());
   } catch { /* cache unavailable: download without caching */ }
-  let bytes: Uint8Array | undefined;
+  let bytes: Uint8Array<ArrayBuffer> | undefined;
   let last: unknown;
   for (const url of LOCAL_MODELS.detectorUrls) {
     try {
